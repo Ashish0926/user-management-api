@@ -3,7 +3,6 @@ package com.ashish.springcrudapi.exception;
 import com.ashish.springcrudapi.dto.response.ErrorResponseDto;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
