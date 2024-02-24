@@ -16,5 +16,6 @@ import lombok.Setter;
 public class ErrorResponseDto {
 
     private int statusCode;
+    private String errorType;
     private String message;
 }
