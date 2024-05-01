@@ -6,6 +6,7 @@ import com.ashish.springcrudapi.dto.request.UserRequest;
 import com.ashish.springcrudapi.dto.response.SuccessResponseDto;
 import com.ashish.springcrudapi.dto.response.UserResponse;
 import com.ashish.springcrudapi.service.UserService;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.AllArgsConstructor;

@@ -1,5 +1,10 @@
 package com.ashish.springcrudapi.service;
 
+import static com.ashish.springcrudapi.constant.PrometheusCounter.CREATE_USER_TOTAL;
+import static com.ashish.springcrudapi.constant.PrometheusCounter.DELETE_USER_BY_ID_TOTAL;
+import static com.ashish.springcrudapi.constant.PrometheusCounter.GET_USERS_TOTAL;
+import static com.ashish.springcrudapi.constant.PrometheusCounter.GET_USER_BY_ID_TOTAL;
+import static com.ashish.springcrudapi.constant.PrometheusCounter.UPDATE_USER_BY_ID_TOTAL;
 import static com.ashish.springcrudapi.constant.ResponseMessages.USER_NOT_FOUND;
 import static java.util.Objects.isNull;
 
@@ -8,6 +13,7 @@ import com.ashish.springcrudapi.dto.response.UserResponse;
 import com.ashish.springcrudapi.entity.User;
 import com.ashish.springcrudapi.exception.UserNotFoundException;
 import com.ashish.springcrudapi.repository.UserRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.List;
 import java.util.Optional;
 import org.modelmapper.ModelMapper;
@@ -21,18 +27,25 @@ public class UserService {
 
     private final ModelMapper modelMapper;
 
-    public UserService(final UserRepository userRepository) {
+    private final MeterRegistry meterRegistry;
+
+    public UserService(final UserRepository userRepository, final MeterRegistry meterRegistry) {
         this.userRepository = userRepository;
+        this.meterRegistry = meterRegistry;
         this.modelMapper = new ModelMapper();
     }
 
     public UserResponse createUser(final UserRequest userRequest) {
+        meterRegistry.counter(CREATE_USER_TOTAL).increment();
+
         final User user = modelMapper.map(userRequest, User.class);
         final User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserResponse.class);
     }
 
     public UserResponse getUserById(final Long id) {
+        meterRegistry.counter(GET_USER_BY_ID_TOTAL).increment();
+
         final Optional<User> optionalUser = userRepository.findById(id);
         final User user = validateUserExists(id, optionalUser);
         return modelMapper.map(user, UserResponse.class);
@@ -47,6 +60,8 @@ public class UserService {
     }
 
     public List<UserResponse> getAllUsers() {
+        meterRegistry.counter(GET_USERS_TOTAL).increment();
+
         final List<User> users = userRepository.findAll();
         return mapToUserResponses(users);
     }
@@ -58,16 +73,25 @@ public class UserService {
     }
 
     public UserResponse updateUserById(final Long id, final UserRequest userRequest) {
+        meterRegistry.counter(UPDATE_USER_BY_ID_TOTAL).increment();
+
         final Optional<User> optionalUser = userRepository.findById(id);
+        final User updatedUserDetails = updateUserDetails(id, userRequest, optionalUser);
+        final User savedUser = userRepository.save(updatedUserDetails);
+        return modelMapper.map(savedUser, UserResponse.class);
+    }
+
+    private User updateUserDetails(final Long id, final UserRequest userRequest, final Optional<User> optionalUser) {
         final User savedUser = validateUserExists(id, optionalUser);
         savedUser.setFirstName(userRequest.getFirstName());
         savedUser.setLastName(userRequest.getLastName());
         savedUser.setEmail(userRequest.getEmail());
-        final User updatedUser = userRepository.save(savedUser);
-        return modelMapper.map(updatedUser, UserResponse.class);
+        return savedUser;
     }
 
     public void deleteUserById(final Long id) {
+        meterRegistry.counter(DELETE_USER_BY_ID_TOTAL).increment();
+
         final Optional<User> optionalUser = userRepository.findById(id);
         final User user = validateUserExists(id, optionalUser);
         userRepository.deleteById(user.getId());
