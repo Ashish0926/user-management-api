@@ -1,4 +1,4 @@
-# spring-crud-api
+# User Management API
 
 ### Setting up local MySQL database
 
