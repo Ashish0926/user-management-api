@@ -24,10 +24,10 @@ management:
       tomcat: true
       jvm: true
       process: true
-      hikaricp: false
+      hikaricp: true
       system: true
       jdbc: true
-      http: false
+      http: true
       logback: true
 
   prometheus:
